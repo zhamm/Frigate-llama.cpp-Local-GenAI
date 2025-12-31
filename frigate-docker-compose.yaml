@@ -1,0 +1,33 @@
+services:
+  frigate:
+    container_name: frigate
+    privileged: true
+    restart: unless-stopped
+    image: ghcr.io/blakeblackshear/frigate:0.16.3-tensorrt
+    shm_size: "1024mb"
+    gpus: "all"
+    devices:
+      - /dev/dri/renderD128
+      - /dev/nvidia-uvm:/dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+      - /dev/nvidia0:/dev/nvidia0
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/config
+      - ./video:/media/frigate
+      - ./labelmap:/labelmap
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 2000000000
+    ports:
+      - "5000:5000"
+      - "443:8971"
+      - "8554:8554"
+      - "8555:8555/tcp"
+      - "8555:8555/udp"
+    environment:
+      FRIGATE_RTSP_PASSWORD: "admin"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,video,utility"
+      OPENAI_BASE_URL: http://frigate-nvr.home:8080/v1
