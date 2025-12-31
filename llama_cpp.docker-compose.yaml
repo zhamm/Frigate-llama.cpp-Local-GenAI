@@ -1,0 +1,26 @@
+services:
+  llama:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llama_cpp
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
+      - LLAMA_VISION_ENABLE_MMSEQ=1
+    command: >
+      -m /models/Qwen3-VL-4B-Instruct-Q4_K_M.gguf
+      --mmproj /models/mmproj-F16.gguf
+      --host 0.0.0.0
+      --port 8080
+      -ngl 99
+      -c 4096
+      --parallel 4
+      -b 1024
+      -ub 256
+      --temp 0.2
